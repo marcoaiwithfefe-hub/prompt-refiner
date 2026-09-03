@@ -1,0 +1,81 @@
+# Secret-scanning rules for the vault, used by the pre-commit hook and by
+# manual `gitleaks git --log-opts=--all .` runs.
+#
+# Why this file exists: gitleaks 8.30's default rule set does NOT cover the
+# providers this vault actually holds keys for. Probed 2026-07-25 with realistic
+# fake tokens: only slack-bot-token fired. Anthropic, OpenRouter, Groq, and
+# Apify token shapes all passed straight through. The default set alone is not
+# sufficient protection for a private remote.
+
+title = "AI brain vault secret rules"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API key"
+regex = '''sk-ant-(?:api|admin)[0-9]{2}-[A-Za-z0-9_\-]{80,120}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
+id = "openrouter-api-key"
+description = "OpenRouter API key"
+regex = '''sk-or-v1-[a-f0-9]{48,80}'''
+keywords = ["sk-or-v1-"]
+
+[[rules]]
+id = "groq-api-key"
+description = "Groq API key"
+regex = '''gsk_[A-Za-z0-9]{40,60}'''
+keywords = ["gsk_"]
+
+[[rules]]
+id = "apify-api-token"
+description = "Apify API token"
+regex = '''apify_api_[A-Za-z0-9]{30,45}'''
+keywords = ["apify_api_"]
+
+[[rules]]
+id = "supabase-access-token"
+description = "Supabase personal/service access token"
+regex = '''sbp_[a-f0-9]{40,}'''
+keywords = ["sbp_"]
+
+[[rules]]
+id = "google-api-key-explicit"
+description = "Google API key"
+regex = '''AIza[0-9A-Za-z_\-]{35}'''
+keywords = ["AIza"]
+
+# Catch-all for providers not enumerated above (Hunter.io, Firecrawl, FUTU,
+# Web3Forms, Higgsfield, FRED, anything added later). Binds to the variable name
+# so plain prose cannot trip it, and requires real entropy so placeholders and
+# model IDs pass through.
+[[rules]]
+id = "generic-key-assignment"
+description = "High-entropy value assigned to a key/token/secret variable"
+regex = '''(?i)\b[A-Z0-9_]*(?:API_?KEY|ACCESS_?TOKEN|AUTH_?TOKEN|SECRET|PASSWORD|PASSWD|PRIVATE_?KEY|CLIENT_?SECRET)[A-Z0-9_]*\b[[:space:]]*[:=][[:space:]]*['"]?([A-Za-z0-9_\-\.\/\+]{24,})['"]?'''
+secretGroup = 1
+entropy = 3.5
+keywords = ["api_key", "apikey", "access_token", "auth_token", "secret", "password", "passwd", "private_key", "client_secret"]
+
+[[rules.allowlists]]
+description = "Placeholders, docs, and env var references are not secrets"
+regexTarget = "match"
+regexes = [
+  '''(?i)(your[_\-]?|my[_\-]?|the[_\-]?|<|\$\{|\$[A-Z]|process\.env|os\.environ|getenv|example|placeholder|redacted|xxxx|\*\*\*|changeme|dummy|sample|fake|test[_\-]?key|not[_\-]?a[_\-]?real)''',
+]
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+  # Lockfiles and vendored trees: integrity hashes look like secrets and are not.
+  '''package-lock\.json$''',
+  '''yarn\.lock$''',
+  '''pnpm-lock\.yaml$''',
+  '''poetry\.lock$''',
+  '''uv\.lock$''',
+  # This rules file itself contains token-shaped regexes by necessity.
+  '''\.gitleaks\.toml$''',
+]
