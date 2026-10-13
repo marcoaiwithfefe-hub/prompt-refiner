@@ -8,9 +8,13 @@ prompt 畀你。嗰段 prompt 逼 AI 每句都要有 source 同日期，每個�
 
 講清楚：佢唔係令 AI 唔會錯，係令你睇得到邊句唔肯定、要去邊度 check。
 
-## 三個用法，揀一個
+## 用法，揀一個
 
-**1. Gemini（手機最快）**
+**0. Gemini skill（新，Gem 11 月 17 號開始轉做 skill）**
+
+用 [`gemini/SKILL.md`](gemini/SKILL.md)。電腦開 Gemini 嘅 Skills 頁（Settings 入面），撳 Create 再揀 Upload，放返呢個 file 入去，再撳 Create，之後任何 chat 打 `/refine` 加你條問題就得。
+
+**1. Gemini Gem（手機最快，Gem 下架前用得）**
 
 <https://gemini.google.com/gem/1t3XGU9t_GE6Ls2uVOw-CP3NoCohCrLtX?usp=sharing>
 
@@ -40,6 +44,7 @@ git clone https://github.com/marcoaiwithfefe-hub/prompt-refiner ~/.claude/skills
 |---|---|
 | `instruction.md` | 規則本身，九條 guardrails，Gem／Project／custom GPT 都係貼呢個 |
 | `SKILL.md` | Claude Code 嘅 `/refine`，行同一套流程 |
+| `gemini/SKILL.md` | Gemini skill 版，九條 guardrails 全部寫埋喺入面，一個 file upload 就用得 |
 
 ## 九條 guardrails
 
